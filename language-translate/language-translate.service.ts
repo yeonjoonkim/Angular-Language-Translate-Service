@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { OpenAiService } from '../open-ai/open-ai.service';
-import { TextTransformService } from '../text-transform/text-transform.service';
 
 export interface ILanguageTranslateResult{
   english: string;
@@ -32,13 +31,13 @@ export class LanguageTranslateService {
   private readonly allLanguage: string = this.language.english + "," + this.language.korean + "," + this.language.traditionalChinese + "," + this.language.japanese;
   private readonly jsonFormat: string = 'as {"english":"translatedValue","korean":"translatedValue","chinese":"translatedValue","japanese":"translatedValue"}';
 
-  constructor(private openAi: OpenAiService, private textTransform: TextTransformService) {
+  constructor(private openAi: OpenAiService) {
   }
 
 
   /** This will trigger open ai api to retreive the translate the sentence to all languages as a JSON format*/
   public async getTranslatedSentenceAllLanguages(sentence: string): Promise<ILanguageTranslateResult>{
-    let commandFormat = this.textTransform.setCommandSentenceFormat(sentence);
+    let commandFormat = this.setCommandSentenceFormat(sentence);
     let command = this.correctGrammerThenTranslateTo + this.allLanguage + this.convertJSON + this.jsonFormat + commandFormat;
     let response: string = await this.openAi.receiveResult(command);
     let jsonFormat: ILanguageTranslateResult = this.setLanguageTranslateResult(response);
@@ -50,10 +49,10 @@ export class LanguageTranslateService {
   /** This will trigger open ai api to retreive the translate the sentence to English */
   public async getTranslateToEnglish(sentence: string): Promise<string>{
     //initial command prompt
-    let commandSentence = this.textTransform.setCommandSentenceFormat(sentence);
+    let commandSentence = this.setCommandSentenceFormat(sentence);
     let command = this.correctGrammerThenTranslateTo + this.language.english + commandSentence + this.returnAsSingleString;
     let response = await this.openAi.receiveResult(command);
-    let result: string = this.textTransform.deleteSpacesString(response);
+    let result: string = this.deleteSpaces(response);
 
     return result;
   }
@@ -62,10 +61,10 @@ export class LanguageTranslateService {
   /** This will trigger open ai api to retreive the translate the sentence to Korean */
   public async getTranslateToKorean(sentence: string): Promise<string>{
     //initial command prompt
-    let commandSentence = this.textTransform.setCommandSentenceFormat(sentence);
+    let commandSentence = this.setCommandSentenceFormat(sentence);
     let command = this.correctGrammerThenTranslateTo + this.language.korean + commandSentence + this.returnAsSingleString;
     let response = await this.openAi.receiveResult(command);
-    let result: string = this.textTransform.deleteSpacesString(response);
+    let result: string = this.deleteSpaces(response);
 
     return result;
   }
@@ -74,10 +73,10 @@ export class LanguageTranslateService {
   /** This will trigger open ai api to retreive the translate the sentence to Traditional Chinese */
   public async getTranslateToTraditionalChinese(sentence: string): Promise<string>{
     //initial command prompt
-    let commandSentence = this.textTransform.setCommandSentenceFormat(sentence);
+    let commandSentence = this.setCommandSentenceFormat(sentence);
     let command = this.correctGrammerThenTranslateTo + this.language.traditionalChinese + commandSentence + this.returnAsSingleString;
     let response = await this.openAi.receiveResult(command);
-    let result: string = this.textTransform.deleteSpacesString(response);
+    let result: string = this.deleteSpaces(response);
 
     return result;
   }
@@ -86,10 +85,10 @@ export class LanguageTranslateService {
   /** This will trigger open ai api to retreive the translate the sentence to Japanese*/
   public async getTranslateToJapanese(sentence: string): Promise<string>{
     //initial command prompt
-    let commandSentence = this.textTransform.setCommandSentenceFormat(sentence);
+    let commandSentence = this.setCommandSentenceFormat(sentence);
     let command = this.correctGrammerThenTranslateTo + this.language.japanese + commandSentence + this.returnAsSingleString;
     let response = await this.openAi.receiveResult(command);
-    let result: string = this.textTransform.deleteSpacesString(response);
+    let result: string = this.deleteSpaces(response);
 
     return result;
   }
@@ -105,13 +104,21 @@ export class LanguageTranslateService {
     };
 
     try{
-      result = JSON.parse(response)
+      result = JSON.parse(response);
     }
     catch(err){
       //Todo: Please modify the error message to be notification or alert user.
-      console.log(err)
+      console.log(err);
     }
     return result;
+  }
+
+  private setCommandSentenceFormat(sentence: string){
+    return '"' + sentence + '"';
+  }
+
+  private deleteSpaces(str: string): string{
+    return str.replace(/(\r\n|\n|\r|\"|)/gm,"");
   }
 
 }

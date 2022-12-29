@@ -1,3 +1,7 @@
+/** TODO: add your api key 
+ * Please go to https://beta.openai.com/account/api-keys to create api key to use the service.
+ * */
+
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -7,7 +11,7 @@ import { Injectable } from '@angular/core';
 export class OpenAiService {
   //API
   private readonly openAiUrl: string = 'https://api.openai.com/v1/completions';
-  private readonly apiKey: string = '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';
+  private readonly apiKey: string = ''; //Please enter your api key.
 
   //API DEFAULT PARAM
   private readonly defaultParams = {
